@@ -8,15 +8,15 @@ body{
     justify-content: center;
     align-items: center;
     min-height: 100%;
+
+    font-family: 'Arial';
 }
 
-svg{
-    background-color: whitesmoke;
-}
 
 
 
-.axis--y path {
+
+#legend-axis path {
     stroke: none;
   }
 
@@ -37,3 +37,14 @@ svg{
     .cell:hover {
         stroke: black;
     }
+
+.county:hover{
+    cursor: url('https://icons-for-free.com/iconfiles/png/512/circle+more+plus+icon-1320183136549593898.png'),auto;
+}
+
+.small{
+    width: 6px;
+    height: 6px;
+    border: 2px solid #fff;
+    border-radius: 50%
+}

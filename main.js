@@ -16,24 +16,38 @@ let height = 800;
 let margin = 60;
 
 const colors = ['#e5f5e0','#c7e9c0','#a1d99b','#74c476','#41ab5d','#238b45','#006d2c']
-const percentages = [3,12,21,30,39,48,57,60]
+const percentages = [3,12,21,30,39,48,57,66]
+
+
+d3.select('body').append('h1').text('United States Educational Attainment').attr('id','title').attr('x',width/2).attr('y',margin)
+d3.select('body').append('h3').text(`Percentage of adults age 25 and older with a bachelor's degree or higher (2010-2014)`).attr('id','description').attr('x',width/2).attr('y',margin).style('text-align','center')
+
+
+d3.select('body').append('svg').attr('id','canvas').attr('width', width).attr('height',height)
+
+const svg = d3.select('svg')
+
+
 
 const drawTheMap = async() =>{
   console.log(countyData)
   console.log(educationData)
 
+
+  console.log(d3.max(educationData, function(data){
+    return data['bachelorsOrHigher']
+  }))
+
   counties = topojson.feature(countyData, countyData.objects.counties).features
   states = topojson.feature(countyData, countyData.objects.states).features
 
+  
 
 
   console.log(countyData)
   console.log(educationData)
 
 
-  d3.select('body').append('svg').attr('id','canvas').attr('width', width).attr('height',height)
-
-  const svg = d3.select('svg')
   const tooltip = d3.select('#tooltip')
 
       svg
@@ -106,19 +120,65 @@ const drawTheMap = async() =>{
 
       
       
-      svg.append('g').attr('class','borders')
+    svg.append('g').attr('class','borders')
 
-      svg
-      .selectAll('borders')
-      .data(states)
-      .enter()
-      .append('path')
-      .attr('d', d3.geoPath())
-      .attr('class','state')
-      .attr('stroke', 'white')
-      .attr('fill','none')
+    svg
+    .selectAll('borders')
+    .data(states)
+    .enter()
+    .append('path')
+    .attr('d', d3.geoPath())
+    .attr('class','state')
+    .attr('stroke', 'white')
+    .attr('fill','none')
       
 
+}
+
+const makeTheLegend = () =>{
+
+  const legendScale = d3.scaleLinear()
+  .domain([3,66])
+  .range([0, width*0.25 - margin])
+
+  let rectheight = 10;
+
+  svg
+  .append('g')
+  .attr('id','legend')
+  .selectAll('rect')
+  .data(colors)
+  .enter()
+  .append('rect')
+  .attr('height',rectheight)
+  .attr('width', (item,index) =>{
+
+
+      return (width*0.25 - margin) / colors.length 
+  })
+  .attr('y', (item) =>{
+      return margin
+  })
+  .attr('x', (item,index) =>{
+      return legendScale(percentages[index]) + width /2
+  })
+  .attr('fill',(item, index) =>{
+          return colors[index]
+  })
+  .attr('transform', `translate(${width*0.15},${0})`)
+
+
+  
+  let legendAxis = d3.axisBottom(legendScale)
+  .tickValues(percentages)
+  .tickFormat(function(d,i){ return `${percentages[i]}%` })
+
+
+  svg
+  .append('g')
+  .call(legendAxis)
+  .attr('id','legend-axis')
+  .attr('transform', `translate(${width*0.65},${margin + rectheight})`)
 }
 
 async function fetchTheData(){
@@ -132,9 +192,10 @@ async function fetchTheData(){
         .then((res)=> educationData = res)
 
         drawTheMap();
+        makeTheLegend();
 
       } catch (error) {
-        console.log('There was an error', error);
+        console.error('There was an error', error);
       }
 }
 
